@@ -27,6 +27,7 @@ command /hub:
             if player = {bluePlayer}:
                 delete {bluePlayer}
             teleport player to {hubspawn}
+            make console execute command "/clear %player%"
             send "&aSuccesfully teleported to hub" to player
             make console execute command "gamemode adventure %player%"
 command /sethub:
