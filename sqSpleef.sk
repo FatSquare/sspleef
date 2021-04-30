@@ -36,7 +36,7 @@ command /sethub:
         set {hubspawn} to player's location
         broadcast "&aNew hub has been selected: %{hubspawn}%"
 
-command /spleef [<text>]:
+command /ss [<text>]:
     trigger:
         if arg-1 is not set:
             Help(player)
@@ -59,18 +59,16 @@ command /spleef [<text>]:
                 delete {redPlayer}
         else if arg-1 = "start":
             disable PvP
-            make console execute command "/fill 35 102 0 55 102 20 snow_block"
-            make console execute command "/fill 35 105 0 55 105 20 snow_block"
-            make console execute command "/fill 35 108 0 55 108 20 snow_block"
+            FixWorld() 
         else:
             Help(player)
 
 function Help(p: player):
     send "&6&lHELP: " to {_p}
-    send "&e/spleef help    (to Show this message)" to {_p}
-    send "&e/spleef reload (to Reload the spleef mod)" to {_p}
-    send "&e/spleef start   (to Start the game)" to {_p}
-    send "&e/spleef leave   (to Leave your current team)" to {_p}
+    send "&e/ss help    (to Show this message)" to {_p}
+    send "&e/ss reload (to Reload the spleef mod)" to {_p}
+    send "&e/ss start   (to Start the game)" to {_p}
+    send "&e/ss leave   (to Leave your current team)" to {_p}
     send "&e/hub   (to teleport to the lobby)" to {_p}
 
 on death of player:
@@ -80,15 +78,19 @@ on death of player:
         teleport {redPlayer} to {hubspawn}
         delete {redPlayer}
         delete {bluePlayer}
+        make console execute command "gamemode adventure @a"
+        make console execute command "clear @a"
+        FixWorld()
     if player = {redPlayer}:
         make console execute command "title @a title {""text"":""Winner is %{bluePlayer}%"",""color"":""blue"",""bold"":""true""}}"
         broadcast "&9BLUE PLAYER WON THE GAME!"
         teleport {bluePlayer} to {hubspawn}
         delete {redPlayer}
         delete {bluePlayer}
+        make console execute command "gamemode adventure @a"
+        make console execute command "clear @a"
+        FixWorld()
     teleport player to {hubspawn}
-    make console execute command "gamemode adventure @a"
-    make console execute command "clear @a"
 on rightclick on a sign:
     if event-location = {redSign}:
         if {redPlayer} = player:
@@ -102,7 +104,7 @@ on rightclick on a sign:
             dye player's chestplate red
             teleport player to {redSpawn}
             set {redPlayer} to player
-            join(player)
+            Join(player)
         else:
             send "&cred team is FULL!" to player
     else if event-location = {blueSign}:
@@ -117,12 +119,12 @@ on rightclick on a sign:
             dye player's chestplate blue
             teleport player to {blueSpawn}
             set {bluePlayer} to player
-            join(player)
+            Join(player)
         else:
             send "&cblue team is FULL!" to player
     else:
         send "&n&ehttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
-function join(p:player):
+function Join(p:player):
     if {redPlayer} is set :
         if {bluePlayer} is set:
             make console execute command "/fill 35 102 0 55 102 20 snow_block"
@@ -149,3 +151,8 @@ function join(p:player):
             send "&c&lNot enough players!" to {_p}
     else:
         send "&9waiting for players!" to {_p}
+
+function FixWorld():
+    make console execute command "/fill 35 102 0 55 102 20 snow_block"
+    make console execute command "/fill 35 105 0 55 105 20 snow_block"
+    make console execute command "/fill 35 108 0 55 108 20 snow_block"
