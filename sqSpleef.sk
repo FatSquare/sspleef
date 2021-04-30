@@ -4,6 +4,22 @@
 variables:
     {redSign} = "x: -1.5, y: 104.5, z: 19.5"
     {blueSign} = "x: -1.5, y: 104.5, z: 2.5"
+    
+on join:
+    make console execute command "/clear %player%"  
+    make console execute command "gamemode adventure %player%"
+    teleport player to {hubspawn}
+    send "&b&9Welcome to sspleef!" to player
+    send "&n&ehttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
+    
+on quit:
+    clear player's inventory
+    if player = {redPlayer}:
+        delete {redPlayer}
+    if player = {bluePlayer}:
+        delete {bluePlayer}
+    make console execute command "gamemode adventure %player%"
+    
 
 command /hub:
     trigger:
@@ -73,21 +89,6 @@ function Help(p: player):
     send "&e/spleef leave   (to Leave your current team)" to {_p}
     send "&e/hub   (to teleport to the lobby)" to {_p}
 
-on join:
-    make console execute command "/clear %player%"  
-    make console execute command "gamemode adventure %player%"
-    teleport player to {hubspawn}
-    send "&b&9Welcome to sspleef!" to player
-    send "&n&e&bhttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
-
-on quit:
-    clear player's inventory
-    if player = {redPlayer}:
-        delete {redPlayer}
-    if player = {bluePlayer}:
-        delete {bluePlayer}
-    make console execute command "gamemode adventure %player%"
-
 on death of player:
     if player = {bluePlayer}:
         broadcast "&cRED PLAYER WON THE GAME!"
@@ -128,4 +129,4 @@ on rightclick on a sign:
         else:
             send "&cblue team is FULL!" to player
     else:
-        send "&n&e&bhttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
+        send "&n&ehttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
