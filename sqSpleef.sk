@@ -1,0 +1,126 @@
+variables:
+    {redSign} = "x: -1.5, y: 104.5, z: 19.5"
+    {blueSign} = "x: -1.5, y: 104.5, z: 2.5"
+
+command /hub:
+    trigger:
+        if {hubspawn} is not set:
+            send "&cThere is no hub." to player
+        else:
+            teleport player to {hubspawn}
+            send "&aSuccesfully teleported to hub" to player
+            make console execute command "gamemode adventure %player%"
+command /sethub:
+    permission: op
+    trigger:
+        set {hubspawn} to player's location
+        broadcast "&aNew hub has been selected: %{hubspawn}%"
+
+command /spleef [<text>]:
+    trigger:
+        if arg-1 is not set:
+            Help(player)
+        else if arg-1 = "help":
+            Help(player)
+        else if arg-1 = "reload":
+            broadcast "&ereloading.."
+            make console execute command "/skript reload sqSpleef"
+            broadcast "&aDone!"
+        else if arg-1 = "leave":
+            if {bluePlayer} = player:
+                make console execute command "/clear %player%"
+                make console execute command "gamemode adventure %player%"
+                teleport player to {hubspawn}
+                delete {bluePlayer}
+            if {redPlayer} = player:
+                make console execute command "/clear %player%"
+                make console execute command "gamemode adventure %player%"
+                teleport player to {hubspawn}
+                delete {redPlayer}
+        else if arg-1 = "start":
+            disable PvP
+            make console execute command "/fill 35 102 0 55 102 20 snow_block"
+            make console execute command "/fill 35 105 0 55 105 20 snow_block"
+            make console execute command "/fill 35 108 0 55 108 20 snow_block"
+            broadcast "&e&bStarting in 3..."
+            wait 1 second
+            broadcast "&e&bStarting in 2..."
+            wait 1 second
+            broadcast "&e&bStarting in 1..."
+            wait 1 second
+            if {redPlayer} is set :
+                if {bluePlayer} is set:
+                    broadcast "&a&bGame Started!"
+                    teleport {redPlayer} to {redpos}
+                    teleport {bluePlayer} to {bluepos}
+                    make console execute command "gamemode survival %{redPlayer}%"
+                    make console execute command "gamemode survival %{bluePlayer}%"
+                else:
+                    broadcast "&c&bNot enough players!"
+            else:
+                broadcast "&c&bNot enough players!"
+        else:
+            Help(player)
+
+function Help(p: player):
+    send "&6&lHELP: " to {_p}
+    send "&e/spleef help    (to Show this message)" to {_p}
+    send "&e/spleef reload (to Reload the spleef mod)" to {_p}
+    send "&e/spleef start   (to Start the game)" to {_p}
+    send "&e/spleef leave   (to Leave your current team)" to {_p}
+    send "&e/hub   (to teleport to the lobby)" to {_p}
+
+on join:
+    make console execute command "/clear %player%"  
+    make console execute command "gamemode adventure %player%"
+    teleport player to {hubspawn}
+
+on quit:
+    clear player's inventory
+    if player = {redPlayer}:
+        delete {redPlayer}
+    if player = {bluePlayer}:
+        delete {bluePlayer}
+    make console execute command "gamemode adventure %player%"
+
+on death of player:
+    if player = {bluePlayer}:
+        broadcast "&cRED PLAYER WON THE GAME!"
+        make console execute command "teleport %{redPlayer}% to {hubspawn}"
+    if player = {redPlayer}:
+        broadcast "&9BLUE PLAYER WON THE GAME!"
+        make console execute command "teleport %{bluePlayer}% to {hubspawn}"
+    teleport player to {hubspawn}
+    make console execute command "gamemode adventure @a"
+    make console execute command "clear @a"
+on rightclick on a sign:
+    if event-location = {redSign}:
+        if {redPlayer} = player:
+            send "&cyou are already on the red team!" to player
+        else if {bluePlayer} = player:
+            send "&cyou are already on the blue team!" to player
+        else if {redPlayer} is not set:
+            send "&aYou joined the red team!" to player
+            give 1 of Diamond Shovel of efficiency 5 to player
+            equip player with Leather Tunic
+            dye player's chestplate red
+            teleport player to {redSpawn}
+            set {redPlayer} to player
+        else:
+            send "&cred team is FULL!" to player
+    else if event-location = {blueSign}:
+        if {bluePlayer} = player:
+            send "&cyou are already on the blue team!" to player
+        else if {redPlayer} = player:
+            send "&cyou are already on the red team!" to player
+        else if {bluePlayer} is not set:
+            send "&aYou joined the blue team!" to player
+            give 1 of Diamond Shovel of efficiency 5 to player
+            equip player with Leather Tunic
+            dye player's chestplate blue
+            teleport player to {blueSpawn}
+            set {bluePlayer} to player
+        else:
+            send "&cblue team is FULL!" to player
+    else:
+        send "&b&9created by squar3dev" to player
