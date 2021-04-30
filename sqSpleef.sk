@@ -1,10 +1,6 @@
 #skript made by squar3dev
 #2021-4-30 (1.16.5) [LAST UPDATE]
 
-variables:
-    {redSign} = "x: -1.5, y: 104.5, z: 19.5"
-    {blueSign} = "x: -1.5, y: 104.5, z: 2.5"
-    
 on join:
     make console execute command "/clear %player%"  
     make console execute command "gamemode adventure %player%"
@@ -26,6 +22,10 @@ command /hub:
         if {hubspawn} is not set:
             send "&cThere is no hub." to player
         else:
+            if player = {redPlayer}:
+                delete {redPlayer}
+            if player = {bluePlayer}:
+                delete {bluePlayer}
             teleport player to {hubspawn}
             send "&aSuccesfully teleported to hub" to player
             make console execute command "gamemode adventure %player%"
@@ -61,23 +61,6 @@ command /spleef [<text>]:
             make console execute command "/fill 35 102 0 55 102 20 snow_block"
             make console execute command "/fill 35 105 0 55 105 20 snow_block"
             make console execute command "/fill 35 108 0 55 108 20 snow_block"
-            broadcast "&e&bStarting in 3..."
-            wait 1 second
-            broadcast "&e&bStarting in 2..."
-            wait 1 second
-            broadcast "&e&bStarting in 1..."
-            wait 1 second
-            if {redPlayer} is set :
-                if {bluePlayer} is set:
-                    broadcast "&a&bGame Started!"
-                    teleport {redPlayer} to {redpos}
-                    teleport {bluePlayer} to {bluepos}
-                    make console execute command "gamemode survival %{redPlayer}%"
-                    make console execute command "gamemode survival %{bluePlayer}%"
-                else:
-                    broadcast "&c&bNot enough players!"
-            else:
-                broadcast "&c&bNot enough players!"
         else:
             Help(player)
 
@@ -91,11 +74,17 @@ function Help(p: player):
 
 on death of player:
     if player = {bluePlayer}:
-        broadcast "&cRED PLAYER WON THE GAME!"
-        make console execute command "teleport %{redPlayer}% to {hubspawn}"
+        make console execute command "title @a title {""text"":""Winner is %{redPlayer}%"",""color"":""red"",""bold"":""true""}}"
+        broadcast "&cTHE RED TEAM WON THE GAME!"
+        teleport {redPlayer} to {hubspawn}
+        delete {redPlayer}
+        delete {bluePlayer}
     if player = {redPlayer}:
+        make console execute command "title @a title {""text"":""Winner is %{bluePlayer}%"",""color"":""blue"",""bold"":""true""}}"
         broadcast "&9BLUE PLAYER WON THE GAME!"
-        make console execute command "teleport %{bluePlayer}% to {hubspawn}"
+        teleport {bluePlayer} to {hubspawn}
+        delete {redPlayer}
+        delete {bluePlayer}
     teleport player to {hubspawn}
     make console execute command "gamemode adventure @a"
     make console execute command "clear @a"
@@ -112,6 +101,7 @@ on rightclick on a sign:
             dye player's chestplate red
             teleport player to {redSpawn}
             set {redPlayer} to player
+            join(player)
         else:
             send "&cred team is FULL!" to player
     else if event-location = {blueSign}:
@@ -126,7 +116,35 @@ on rightclick on a sign:
             dye player's chestplate blue
             teleport player to {blueSpawn}
             set {bluePlayer} to player
+            join(player)
         else:
             send "&cblue team is FULL!" to player
     else:
         send "&n&ehttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
+function join(p:player):
+    if {redPlayer} is set :
+        if {bluePlayer} is set:
+            make console execute command "/fill 35 102 0 55 102 20 snow_block"
+            make console execute command "/fill 35 105 0 55 105 20 snow_block"
+            make console execute command "/fill 35 108 0 55 108 20 snow_block"
+            make console execute command "title @a title {""text"":""Starting in 3.."",""color"":""yellow"",""bold"":""true""}}"
+            wait 1 second
+            {redPlayer} is set
+            {bluePlayer} is set
+            make console execute command "title @a title {""text"":""Starting in 2.."",""color"":""yellow"",""bold"":""true""}}"
+            wait 1 second
+            {redPlayer} is set
+            {bluePlayer} is set
+            make console execute command "title @a title {""text"":""Starting in 1.."",""color"":""yellow"",""bold"":""true""}}"
+            wait 1 second
+            {redPlayer} is set
+            {bluePlayer} is set
+            make console execute command "title @a title {""text"":""Game Started!"",""color"":""blue"",""bold"":""true""}}"
+            teleport {redPlayer} to {redpos}
+            teleport {bluePlayer} to {bluepos}
+            make console execute command "gamemode survival %{redPlayer}%"
+            make console execute command "gamemode survival %{bluePlayer}%"
+        else:
+            send "&c&lNot enough players!" to {_p}
+    else:
+        send "&9waiting for players!" to {_p}
