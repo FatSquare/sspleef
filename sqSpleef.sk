@@ -1,3 +1,6 @@
+#skript made by squar3dev
+#2021-4-30 (1.16.5) [LAST UPDATE]
+
 variables:
     {redSign} = "x: -1.5, y: 104.5, z: 19.5"
     {blueSign} = "x: -1.5, y: 104.5, z: 2.5"
@@ -74,6 +77,8 @@ on join:
     make console execute command "/clear %player%"  
     make console execute command "gamemode adventure %player%"
     teleport player to {hubspawn}
+    send "&b&9Welcome to sspleef!" to player
+    send "&n&e&bhttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
 
 on quit:
     clear player's inventory
@@ -123,4 +128,4 @@ on rightclick on a sign:
         else:
             send "&cblue team is FULL!" to player
     else:
-        send "&b&9created by squar3dev" to player
+        send "&n&e&bhttps://github.com/FatSquare/sspleef/blob/main/sqSpleef.sk" to player
