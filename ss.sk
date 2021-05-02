@@ -1,0 +1,367 @@
+#skript made by squar3dev
+#2021-4-30 (1.16.5) [LAST UPDATE]
+
+#  ____    ____ 
+# / ___|  / ___|  
+# \___ \  \___ \
+#  ___) |  ___) |
+# |____/  |____/
+
+#Used Variables : {hubspawn} {bluespawn} {redspawn} {spleefLocation} {tntLocation} {tntspawn} {redSign} {blueSign} {tntSign} {spleefSign} {redpos} {bluepos}
+variables:
+    {%player%.inGame} = false
+    {worldName} = "maps/sqSpleef"
+    {isTNTGameStarting} = false
+    {isTNTGameStarted} = false
+    {isTNTDropping} = false
+    {game::%player%} = "null"
+
+on join:
+    wait 10 ticks
+    player's world is {worldName}
+    make console execute command "/clear %player%"  
+    make console execute command "gamemode adventure %player%"
+    teleport player to {hubspawn}
+    send "&b&9Welcome to ssGames!" to player
+
+on quit:
+    player's world is {worldName}
+    set {game::%player%} to "null"
+    clear player's inventory
+    if player = {redPlayer}:
+        delete {redPlayer}
+    if player = {bluePlayer}:
+        delete {bluePlayer}
+    make console execute command "gamemode adventure %player%"
+    set {%player%.inGame} to false
+
+on damage:
+    victim's world is {worldName}
+    if damage cause is fall:
+        cancel the event
+
+on death of player:
+    player's world is {worldName}
+    set {game::%player%} to "null"
+    set {%player%.inGame} to false
+    if player = {bluePlayer}:
+        play sound "ENTITY_FIREWORK_ROCKET_TWINKLE" to all players
+        make console execute command "title @a title {""text"":""%{redPlayer}% Won !"",""color"":""red"",""bold"":""true""}}"
+        teleport {redPlayer} to {spleefLocation}
+        set {redPlayer.inGame} to false
+        delete {redPlayer}
+        delete {bluePlayer}
+        make console execute command "gamemode adventure @a"
+        make console execute command "clear @a"
+        FixWorld()
+        teleport player to {spleefLocation}
+        exit
+    if player = {redPlayer}:
+        play sound "ENTITY_FIREWORK_ROCKET_TWINKLE" to all players
+        make console execute command "title @a title {""text"":""%{bluePlayer}% Won !"",""color"":""blue"",""bold"":""true""}}"
+        teleport {bluePlayer} to {spleefLocation}
+        set {bluePlayer.inGame} to false
+        delete {redPlayer}
+        delete {bluePlayer}
+        make console execute command "gamemode adventure @a"
+        make console execute command "clear @a"
+        FixWorld()
+        teleport player to {spleefLocation}
+        exit
+    if {game::%player%} = "tnt":
+        teleport player to {tntLocation}
+        make console execute command "clear %player%"
+        exit
+
+on walking on tnt:
+    player's world is {worldName}
+    if {isTNTDropping} = true:
+        loop all blocks in radius 1.3 around the player:
+            if loop-block is tnt:
+                wait 1 second
+                if {isTNTDropping} = true:
+                    set loop-block to air
+
+on hunger meter change:
+   player's world is {worldName}
+   cancel event 
+
+on rightclick on a Player wall-mounted Head:
+    player's world is {worldName}
+    loop {github::*}:
+        if loop-value = location of event-block:
+            send "&3https://github.com/FatSquare/sspleef/" to player
+    loop {discord::*}:
+        if loop-value = location of event-block:
+            send "&3squar3##5462" to player
+
+on rightclick on a sign:
+    player's world is {worldName}
+    if event-location = {redSign}:
+        if {redPlayer} = player:
+            send "&cyou are already on the red team!" to player
+        else if {bluePlayer} = player:
+            send "&cyou are already on the blue team!" to player
+        else if {redPlayer} is not set:
+            send "&aYou joined the red team!" to player
+            give 1 of Diamond Shovel of efficiency 5 to player
+            equip player with Leather Tunic
+            dye player's chestplate red
+            teleport player to {redSpawn}
+            set {redPlayer} to player
+            Join(player)
+        else:
+            send "&cred team is FULL!" to player
+
+    else if event-location = {blueSign}:
+        if {bluePlayer} = player:
+            send "&cyou are already on the blue team!" to player
+        else if {redPlayer} = player:
+            send "&cyou are already on the red team!" to player
+        else if {bluePlayer} is not set:
+            send "&aYou joined the blue team!" to player
+            give 1 of Diamond Shovel of efficiency 5 to player
+            equip player with Leather Tunic
+            dye player's chestplate blue
+            teleport player to {blueSpawn}
+            set {bluePlayer} to player
+            Join(player)
+        else:
+            send "&cblue team is FULL!" to player
+    else if event-location = {spleefSign}:
+        teleport player to {spleefLocation}
+    else if event-location = {tntSign}:
+        teleport player to {tntLocation}
+    else if event-location = {startTntSign}:
+        if {isTNTGameStarted} = false:
+            JoinTNT(player)
+        else:
+            send "&c&lGame already started!"
+
+on rightclick holding Feather:
+    player's world is {worldName}
+    #if isTNTGameStarted:
+    push the player upwards at speed 1
+    remove 1 Feather from the inventory of the player
+
+on rightclick holding Blaze Powder:
+    player's world is {worldName}
+    #if isTNTGameStarted:
+    push the player forwards at speed 2
+    remove 1 Blaze Powder from the inventory of the player
+
+command /hub:
+    description : teleport to hub
+    trigger:
+        player's world is {worldName}
+        if {hubspawn} is not set:
+            send "&cThere is no hub." to player
+        else:
+            if player = {redPlayer}:
+                delete {redPlayer}
+                set {%player%.inGame} to false
+            else if player = {bluePlayer}:
+                delete {bluePlayer}
+                set {%player%.inGame} to false
+            else:
+                set {%player%.inGame} to false
+                set {game::%player%} to "null"
+            teleport player to {hubspawn}
+            make console execute command "/clear %player%"
+            send "&aSuccesfully teleported to hub" to player
+            make console execute command "gamemode adventure %player%"
+
+command /sethub:
+    permission: op
+    trigger:
+        player's world is {worldName}
+        set {hubspawn} to player's location
+        broadcast "&aNew hub has been selected: %{hubspawn}%"
+
+command /admin [<text>]:
+    permission: op
+    trigger:
+        player's world is {worldName}
+        if arg-1 = "list-tnt":
+            set {_c} to CountTNTPlayers()
+            broadcast "%{_c}%"
+
+command /tnt [<text>]:
+    trigger:
+        player's world is {worldName}
+        if arg-1 is not set:
+            tntHelp(player)
+        else if arg-1 = "start":
+            if player is op:
+                StartTNTGame()
+            else:
+                broadcast "You are not allowed to do that"
+        else:
+            tntHelp(player)
+
+command /ss [<text>]:
+    trigger:
+        player's world is {worldName}
+        if arg-1 is not set:
+            Help(player)
+        else if arg-1 = "debug":
+            send "%{%player%.inGame}%" to player
+        else if arg-1 = "help":
+            Help(player)
+        else if arg-1 = "reload":
+            broadcast "&ereloading.."
+            make console execute command "/skript reload ss"
+            broadcast "&aDone!"
+        else if arg-1 = "leave":
+            if {bluePlayer} = player:
+                make console execute command "/clear %player%"
+                make console execute command "gamemode adventure %player%"
+                teleport player to {spleefLocation}
+                delete {bluePlayer}
+                set {%player%.inGame} to false
+            else if {redPlayer} = player:
+                make console execute command "/clear %player%"
+                make console execute command "gamemode adventure %player%"
+                teleport player to {spleefLocation}
+                delete {redPlayer}
+                set {%player%.inGame} to false
+            else if {%player%.inGame} is true:
+                make console execute command "/clear %player%"
+                make console execute command "gamemode adventure %player%"
+                teleport player to {tntLocation}
+                set {%player%.inGame} to false
+                set {game::%player%} to "null"
+        else:
+            Help(player)
+
+function CountTNTPlayers() :: integer:
+    set {_count} to 0
+    loop all players:
+        if {game::%loop-player%} = "tnt":
+            add 1 to {_count}
+    return {_count}
+
+function Help(p: player):
+    {_p}'s world is {worldName}
+    send "&6&lHELP: " to {_p}
+    send "&e/ss help    (to Show this message)" to {_p}
+    send "&e/ss reload (to Reload the spleef mod)" to {_p}
+    send "&e/ss leave   (to Leave your current team)" to {_p}
+    send "&e/hub   (to teleport to the lobby)" to {_p}
+
+function tntHelp(p: player):
+    {_p}'s world is {worldName}
+    send "&6&lTNT HELP: " to {_p}
+    send "&e/tnt help    (to Show this message)" to {_p}
+    send "&e/tnt join  (to join a TNTRun game)" to {_p}
+
+function JoinTNT(p:player):
+    {%{_p}%.inGame} is false
+    set {%{_p}%.inGame} to true
+    set {game::%{_p}%} to "tnt"
+    teleport {_p} to {tntspawn}
+    if {isTNTGameStarting} = false:
+        if CountTNTPlayers() > 1:
+            set {isTNTGameStarting} to true
+            broadcast "&e&lTNT game will start after 10 seconds!" 
+            wait 5 seconds
+            if CountTNTPlayers() < 1:
+                broadcast "&c&lNot enough players for the tnt game!"
+                set {isTNTGameStarting} to false
+                exit
+            wait 5 seconds
+            if CountTNTPlayers() < 1:
+                broadcast "&c&lNot enough players for the tnt game!"
+                set {isTNTGameStarting} to false
+                exit
+            StartTNTGame()
+            set {isTNTGameStarting} to false
+    while {_p} is online:
+        wait 1 ticks
+        if {game::%{_p}%} = "tnt":
+            if {isTNTGameStarted} = true:
+                if CountTNTPlayers() = 1:
+                    play sound "ENTITY_FIREWORK_ROCKET_TWINKLE" to all players
+                    make console execute command "clear %{_p}%"
+                    make console execute command "title @a title {""text"":""%{_p}% Won!"",""color"":""green"",""bold"":""true""}}"
+                    set {isTNTDropping} to false
+                    FillTNT()
+                    wait 3 second
+                    teleport {_p} to {tntLocation}
+                    set {%{_p}%.inGame} to false
+                    set {isTNTGameStarted} to false
+                    exit
+        else:
+            exit
+
+function Join(p:player):
+    {_p}'s world is {worldName}
+    set {%{_p}%.inGame} to true
+    if {redPlayer} is set :
+        if {bluePlayer} is set:
+            make console execute command "/fill 35 102 0 55 102 20 snow_block"
+            make console execute command "/fill 35 105 0 55 105 20 snow_block"
+            make console execute command "/fill 35 108 0 55 108 20 snow_block"
+            disable PvP in {_p}'s world
+            play sound "BLOCK_NOTE_BLOCK_PLING" to all players
+            make console execute command "title @a title {""text"":""Starting in 3.."",""color"":""yellow"",""bold"":""true""}}"
+            wait 1 second
+            {redPlayer} is set
+            {bluePlayer} is set
+            play sound "BLOCK_NOTE_BLOCK_PLING" to all players
+            make console execute command "title @a title {""text"":""Starting in 2.."",""color"":""yellow"",""bold"":""true""}}"
+            wait 1 second
+            {redPlayer} is set
+            {bluePlayer} is set
+            play sound "BLOCK_NOTE_BLOCK_PLING" to all players
+            make console execute command "title @a title {""text"":""Starting in 1.."",""color"":""yellow"",""bold"":""true""}}"
+            wait 1 second
+            {redPlayer} is set
+            {bluePlayer} is set
+            play sound "ENTITY_EXPERIENCE_ORB_PICKUP" to all players
+            make console execute command "title @a title {""text"":""Game Started!"",""color"":""blue"",""bold"":""true""}}"
+            teleport {redPlayer} to {redpos}
+            teleport {bluePlayer} to {bluepos}
+            make console execute command "gamemode survival %{redPlayer}%"
+            make console execute command "gamemode survival %{bluePlayer}%"
+        else:
+            send "&c&lNot enough players!" to {_p}
+    else:
+        send "&9waiting for players!" to {_p}
+
+function FixWorld():
+    make console execute command "/fill 35 102 0 55 102 20 snow_block"
+    make console execute command "/fill 35 105 0 55 105 20 snow_block"
+    make console execute command "/fill 35 108 0 55 108 20 snow_block"
+
+function FillTNT():
+    make console execute command "/fill -44 100 20 -64 100 0 tnt"
+    make console execute command "/fill -44 105 20 -64 105 0 tnt"
+    make console execute command "/fill -44 110 20 -64 110 0 tnt"
+    make console execute command "/fill -44 115 20 -64 115 0 tnt"
+
+function StartTNTGame():
+    disable PvP in {_p}'s world
+    play sound "BLOCK_NOTE_BLOCK_PLING" to all players
+    make console execute command "title @a title {""text"":""Starting in 3.."",""color"":""yellow"",""bold"":""true""}}"
+    wait 1 second
+    play sound "BLOCK_NOTE_BLOCK_PLING" to all players
+    make console execute command "title @a title {""text"":""Starting in 2.."",""color"":""yellow"",""bold"":""true""}}"
+    wait 1 second
+    play sound "BLOCK_NOTE_BLOCK_PLING" to all players
+    make console execute command "title @a title {""text"":""Starting in 1.."",""color"":""yellow"",""bold"":""true""}}"
+    wait 1 second
+    if CountTNTPlayers() < 1:
+        broadcast "&c&lNot enough players for the tnt game!"
+        exit
+    play sound "ENTITY_EXPERIENCE_ORB_PICKUP" to all players
+    make console execute command "title @a title {""text"":""Game Started!"",""color"":""blue"",""bold"":""true""}}"
+    loop all players:
+        if {game::%loop-player%} = "tnt":
+            add 2 Feather named "&a&lyehh!" with lore "dash upwards" and "&9Press Right-click to use" to loop-player's inventory 
+            add 1 Blaze Powder named "&a&lVnnnn" with lore "dash forwards" and "&9Press Right-click to use" to loop-player's inventory 
+            set {_x} to a random integer between -44 and -62
+            set {_z} to a random integer between 1 and 19
+            make console execute command "teleport %loop-player% %{_x}% 118 %{_z}%"        
+    set {isTNTGameStarted} to true
+    set {isTNTDropping} to true
